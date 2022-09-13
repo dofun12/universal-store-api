@@ -1,1 +1,1 @@
-docker build -t universal-store-api -f docker/Dockerfile .
+docker build --rm -t lemanoman/universal-store-api:latest -f docker/Dockerfile .
