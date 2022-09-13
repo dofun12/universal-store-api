@@ -1,0 +1,1 @@
+docker run --rm --publish 9000:80  --env-file environment/kevim-env universal-store-api

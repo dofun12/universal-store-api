@@ -1,0 +1,1 @@
+docker build -t universal-store-api -f docker/Dockerfile .
