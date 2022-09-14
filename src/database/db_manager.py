@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from pymongo import MongoClient
@@ -61,7 +62,8 @@ class DBManager:
         uuid_str = str(uuid.uuid4())
         generic_data = {
             "uuid": uuid_str,
-            "data": data
+            "data": data,
+            "date_created": datetime.datetime.utcnow()
         }
         try:
             result = collection.insert_one(generic_data)
@@ -94,7 +96,10 @@ class DBManager:
             "uuid": uuid_str
         }
         try:
-            collection.update_one(filter_obj, {"$set": {"data": data}})
+            collection.update_one(filter_obj, {"$set": {
+                "data": data,
+                "date_updated": datetime.datetime.utcnow()
+            }})
             founded = collection.find_one(filter_obj)
             return self.toJson({'response': 'Founded', 'success': True, 'data': self.toJson(founded, True)})
         except Exception as e:
