@@ -1,5 +1,6 @@
 import datetime
 import json
+from typing import Union
 
 from pymongo import MongoClient
 from bson.json_util import dumps, loads
@@ -38,12 +39,18 @@ class DBManager:
             return json.loads(dumps(json_object))
         return json_object
 
-    def list_all(self, db_name: str, collection: str):
+    def list_all(self, db_name: str, collection: str, filter: Union[dict, None] = None):
         db = self.client[db_name]
         collection = db[collection]
+        cursor = None
+        if filter is not None:
+            cursor = collection.find(filter)
+            list_cur = list(cursor)
+            return self.toJson(list_cur, True)
         cursor = collection.find()
         list_cur = list(cursor)
         return self.toJson(list_cur, True)
+
 
     def insert(self, db_name: str, collection: str, data: dict):
         db = self.client[db_name]
