@@ -63,6 +63,7 @@ class DBManager:
             print(e)
             return self.toJson({'response': 'Can\'t save', 'success': False})
 
+
     def store_item(self, data: dict):
         db = self.client['generics']
         collection = db['objects']
@@ -72,6 +73,30 @@ class DBManager:
             "data": data,
             "date_created": datetime.datetime.utcnow()
         }
+        try:
+            result = collection.insert_one(generic_data)
+            if not result.acknowledged:
+                return self.toJson({'response': 'Can\'t save', 'success': False})
+            return self.toJson({'response': 'Saved', 'success': True, 'uuid': uuid_str})
+        except Exception as e:
+            print(e)
+            return self.toJson({'response': 'Can\'t save', 'success': False})
+
+    def store_list(self, data: dict = None):
+        db = self.client['generics']
+        collection = db['objects']
+        uuid_str = str(uuid.uuid4())
+        generic_data = {
+            "uuid": uuid_str,
+            "data": [],
+            "date_created": datetime.datetime.utcnow()
+        }
+        if data is not None:
+            generic_data = {
+                "uuid": uuid_str,
+                "data": [data],
+                "date_created": datetime.datetime.utcnow()
+            }
         try:
             result = collection.insert_one(generic_data)
             if not result.acknowledged:
@@ -107,6 +132,23 @@ class DBManager:
                 "data": data,
                 "date_updated": datetime.datetime.utcnow()
             }})
+            founded = collection.find_one(filter_obj)
+            return self.toJson({'response': 'Founded', 'success': True, 'data': self.toJson(founded, True)})
+        except Exception as e:
+            print(e)
+            return self.toJson({'response': 'Can\'t update', 'success': False})
+
+    def append_item(self, uuid_str: str, data: dict):
+        db = self.client['generics']
+        collection = db['objects']
+
+        filter_obj = {
+            "uuid": uuid_str
+        }
+        try:
+            collection.update_one(filter_obj, {"$set": {
+                "date_updated": datetime.datetime.utcnow()
+            }, "$push": {"data": data}})
             founded = collection.find_one(filter_obj)
             return self.toJson({'response': 'Founded', 'success': True, 'data': self.toJson(founded, True)})
         except Exception as e:
