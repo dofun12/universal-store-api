@@ -8,6 +8,7 @@ from bson.json_util import dumps, loads
 import os
 import uuid
 
+
 # Now you can perfom any CRUD operations on the DB
 # testes
 # colecao
@@ -19,16 +20,21 @@ class DBManager:
     MONGODB_USER = None
 
     @staticmethod
-    def set_var_if_exists(var_name, default):
-        if os.environ[var_name] is None:
+    def set_var_if_exists(var_name, default, **kwargs):
+        try:
+            if kwargs.get(var_name) is not None:
+                return kwargs.get(var_name)
+            if os.environ[var_name] is None:
+                return default
+        except Exception as e:
             return default
         return os.environ[var_name]
 
-    def __init__(self):
-        self.MONGODB_HOST = self.set_var_if_exists("MONGODB_HOST", "localhost")
-        self.MONGODB_PORT = self.set_var_if_exists("MONGODB_PORT", "27017")
-        self.MONGODB_PWD = self.set_var_if_exists("MONGODB_PWD", "root")
-        self.MONGODB_USER = self.set_var_if_exists("MONGODB_USER", "root")
+    def __init__(self, **kwargs):
+        self.MONGODB_HOST = self.set_var_if_exists("MONGODB_HOST", "localhost",  **kwargs)
+        self.MONGODB_PORT = self.set_var_if_exists("MONGODB_PORT", "27017",  **kwargs)
+        self.MONGODB_PWD = self.set_var_if_exists("MONGODB_PWD", "root",  **kwargs)
+        self.MONGODB_USER = self.set_var_if_exists("MONGODB_USER", "root",  **kwargs)
 
         connection_url = "mongodb://" + self.MONGODB_USER + ":" + self.MONGODB_PWD + "@" + self.MONGODB_HOST + ":" + self.MONGODB_PORT
         print(connection_url)
@@ -51,7 +57,6 @@ class DBManager:
         list_cur = list(cursor)
         return self.toJson(list_cur, True)
 
-
     def insert(self, db_name: str, collection: str, data: dict):
         db = self.client[db_name]
         collection = db[collection]
@@ -62,7 +67,6 @@ class DBManager:
         except Exception as e:
             print(e)
             return self.toJson({'response': 'Can\'t save', 'success': False})
-
 
     def store_item(self, data: dict):
         db = self.client['generics']
